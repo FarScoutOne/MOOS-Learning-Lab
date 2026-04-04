@@ -20,25 +20,6 @@ Return Value:
 //an alternative OnNewMail using PeekMail and checking for stale messages
 bool CSimulator::OnNewMail(MOOSMSG_LIST &NewMail)
 {
-    CMOOSMsg Msg;
-    double dfNow = MOOSTime();
-
-    if (m_Comms.PeekMail(NewMail, "VehicleStatus", Msg, false, true))
-    {
-        if (!Msg.IsSkewed(dfNow))
-        {
-            OnVehicleStatus(Msg);
-        }
-    }
-
-    if (m_Comms.PeekMail(NewMail, "Heading", Msg, false, true))
-    {
-        if (!Msg.IsSkewed(dfNow))
-        {
-            OnHeading(Msg);
-        }
-    }
-
     return true;
 }
 
@@ -49,9 +30,6 @@ notifications you want to receive here.
 **/
 bool CSimulator::OnConnectToServer()
 {
-    //do registrations
-    DoRegistrations();
-
     return true;
 }
 
@@ -60,7 +38,32 @@ which does the work of the application.
 **/
 bool CSimulator::Iterate()
 {
-    return true;
+    statis int k = 0;
+
+    if (k++%10 == 0)
+    {
+        //simulate some brownian motion
+        static double dfHeading = 0;
+        dfHeading += MOOSWhiteNoise(0.1);
+
+        //publish the data (2nd param is a double so it will be forever double data...)
+        m_Comms.Notify("Heading".dfHeading.MOOSTime());
+    }
+    
+    if (k%35 == 0)
+        {
+            static double dfVolts = 100;
+            dfVolts -= fabs(MOOSWhiteNoise(0.1));
+            std::string sStatus = MOOSFormat(std::format("Status={},BatteryVoltage={:.2f},Bilge={}",
+                        dfVolts > 50.0 ? "Good" : "Bad",
+                        dfVolts,
+                        k%100 > 50 ? "On" : "Off");
+
+            //publish the data (2nd param is a std:: string so it will be forever string data...)
+            m_Comms.Notify("VehicleStatus", sStatus, MOOSTime());
+        }
+
+        return true;
 }
 
 /** Called by the base class before the first ::Iterate is called. Place
