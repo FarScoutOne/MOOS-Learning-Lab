@@ -1,14 +1,9 @@
 #include "simulator.h"
 #include <format>
 
-//default constructor
-CSimpleApp::CSimpleApp()
-{
-}
-//default (virtual) destructor
-CSimpleApp::~CSimpleApp()
-{
-}
+// Use compiler generated default constructor and destructor
+CSimulator::CSimulator() = default;
+CSimulator::~CSimulator() = default;
 
 /**
 Called by base class whenever new mail has arrived.
@@ -23,7 +18,7 @@ Return Value:
     return false if there was a problem
 **/
 //an alternative OnNewMail using PeekMail and checking for stale messages
-bool CSimpleApp::OnNewMail(MOOSMSG_LIST &NewMail)
+bool CSimulator::OnNewMail(MOOSMSG_LIST &NewMail)
 {
     CMOOSMsg Msg;
     double dfNow = MOOSTime();
@@ -52,7 +47,7 @@ called by the base class when the application has made contact with
 the MOOSDB and a channel has been opened. Place code to specify what
 notifications you want to receive here.
 **/
-bool CSimpleApp::OnConnectToServer()
+bool CSimulator::OnConnectToServer()
 {
     //do registrations
     DoRegistrations();
@@ -63,7 +58,7 @@ bool CSimpleApp::OnConnectToServer()
 /** Called by the base class periodically. This is where you place code
 which does the work of the application.
 **/
-bool CSimpleApp::Iterate()
+bool CSimulator::Iterate()
 {
     return true;
 }
@@ -72,7 +67,7 @@ bool CSimpleApp::Iterate()
 startup code here - especially code which reads configuration data from the
 mission file.
 **/
-bool CSimpleApp::OnStartUp()
+bool CSimulator::OnStartUp()
 {
     //do registration - it's good practice to do this BOTH in OnStartUp and
     //in OnConnectToServer - that way if comms is lost registrations will be
@@ -82,7 +77,7 @@ bool CSimpleApp::OnStartUp()
     return true;
 }
 
-bool CSimpleApp::OnVehicleStatus(CMOOSMsg& Msg)
+bool CSimulator::OnVehicleStatus(CMOOSMsg& Msg)
 {
     MOOSTrace(std::format("I ({}) received a notification about \"{}\" the details are:\n",
         GetAppName(),
@@ -117,7 +112,7 @@ bool CSimpleApp::OnVehicleStatus(CMOOSMsg& Msg)
     return true;
 }
 
-bool CSimpleApp::OnHeading(CMOOSMsg& Msg)
+bool CSimulator::OnHeading(CMOOSMsg& Msg)
 {
     MOOSTrace(std::format("I {} received a notification about \"{}\" the details are:\n",
         GetAppName(),  //note the GetAppName() returns the name of this application as seen by the DB
@@ -144,7 +139,7 @@ bool CSimpleApp::OnHeading(CMOOSMsg& Msg)
     return true;
 }
 
-void CSimpleApp::DoRegistrations()
+void CSimulator::DoRegistrations()
 {
     std::cout << "DoRegistrations called" << std::endl;
 
