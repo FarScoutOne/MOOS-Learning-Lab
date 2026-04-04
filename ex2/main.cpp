@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     const char* sMissionFile = "Mission.moos";
 
     //under what name should the application register with the MOOSDB?
-    const char* sMOOSName = "MyMOOSApp";
+    const char* sMOOSName = "Simulator";
 
     switch(argc)
     {
