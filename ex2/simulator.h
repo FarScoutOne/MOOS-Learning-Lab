@@ -1,35 +1,35 @@
-// Ex1/simple_app.h: interface for the CSimpleApp class.
+// ex2/simulator.h: interface for the CSimulator class.
 
 #ifndef SIMULATOR_H
 #define SIMULATOR_H
 
 #include <MOOS/libMOOS/MOOSLib.h>
+#include <string>
 
 class CSimulator : public CMOOSApp
 {
 public:
-    //standard construction and destruction
-    CSimulator();
-    virtual ~CSimulator();
+    CSimulator() = default;
+    virtual ~CSimulator() = default;
 
 protected:
-    //where we handle new mail
+    // where we handle new mail
     bool OnNewMail(MOOSMSG_LIST& NewMail);
-    //where we do the work
+    // where we do the work
     bool Iterate();
-    //called when we connect to the server
+    // called when we connect to the server
     bool OnConnectToServer();
-    //called when we are starting up..
+    // called when we are starting up
     bool OnStartUp();
 
-    //state our interest in variables
-    void DoRegistrations();
+private:
+    // vehicle configuration read from mission file
+    std::string m_sVehicleName;
+    std::string m_sBilge;
 
-    // we'll call this if/when we receive a vehicle status message
-    bool OnVehicleStatus(CMOOSMsg& Msg);
-
-    // we'll call this if/when we receive a heading message
-    bool OnHeading(CMOOSMsg& Msg);
+    // vehicle state
+    double m_dfHeading;
+    double m_dfBatteryVoltage;
 };
 
 #endif

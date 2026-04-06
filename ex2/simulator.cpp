@@ -1,9 +1,7 @@
 #include "simulator.h"
 #include <format>
+#include <cmath>
 
-// Use compiler generated default constructor and destructor
-CSimulator::CSimulator() = default;
-CSimulator::~CSimulator() = default;
 
 /**
 Called by base class whenever new mail has arrived.
@@ -72,85 +70,51 @@ mission file.
 **/
 bool CSimulator::OnStartUp()
 {
-    //do registration - it's good practice to do this BOTH in OnStartUp and
-    //in OnConnectToServer - that way if comms is lost registrations will be
-    //reinstigated when the connection is remade
-    DoRegistrations();
+    //here we extract the vehicle name...
+    m_sVehicleName = "UnNamed";
+    if (!m_MissionReader.GetConfigurationParam("VehicleName", m_sVehicleName))
+        MOOSTrace(std::format("Warning parameter \"VehicleName\" not specified. Using default of \"{}\"\n",
+            m_sVehicleName));
+
+    //here we extract a vector of doubles from the configuration file
+    std::vector vInitialLocation(3, 0.0);
+    int nRows = vInitialLocation.size();
+    int nCols = 1;
+
+    if (!m_MissionReader.GetConfigurationParam("InitialLocation", vInitialLocation, nRows, nCols))
+        MOOSTrace(std::format("Warning parameter \"InitialLocation\" not specified. Using default of \"{}\"\n",
+            DoubleVector2String(vInitialLocation)));
+
+    //here we extract a more complicated compound string parameter
+    std::string sComplex;
+    if (m_MissionReader.GetConfigurationParam("InitialConditions", sComplex))
+    {
+        //OK now we can suck out individual parameters from sComplex
+
+        //what is the initial Bilge condition status?
+        m_sBilge = "Off";
+        MOOSValFromString(m_sBilge, sComplex, "Bilge");
+
+        //what is the initial battery Voltage?
+        m_dfBatteryVoltage = 100.0;
+        MOOSValFromString(m_dfBatteryVoltage, sComplex, "BatteryVoltage");
+
+        //what is the initial heading?
+        m_dfHeading = 0;
+        MOOSValFromString(m_dfHeading, sComplex, "Heading");
+    }
+    else
+    {
+        //bad news - this one is compulsory for this application...
+        return MOOSFail("no \"InitialConditions\" specified in mission file (compulsory)\n");
+    }
+
+    MOOSTrace("Verbose Summary:\n");
+    MOOSTrace(std::format("\tVehicle is called : {}\n", m_sVehicleName));
+    MOOSTrace("\tInitial Location is  : {}\n", DoubleVector2String(vInitialLocation).c_str());
+    MOOSTrace(std::format("\tHeading is  : {}\n", m_sBilge));
 
     return true;
-}
-
-bool CSimulator::OnVehicleStatus(CMOOSMsg& Msg)
-{
-    MOOSTrace(std::format("I ({}) received a notification about \"{}\" the details are:\n",
-        GetAppName(),
-        Msg.GetKey()));
-
-    //if you want to see all the details you can print a message...
-    //Msg.Trace();
-
-    if (!Msg.IsString())
-        return MOOSFail("Ouch - I was promised \"VehicleStatus\" would be a string!");
-
-    //OK the guy who wrote the program that publishes VehicleStatus wrote me an
-    //email saying the format of the message is:
-    //Status = [Good/Bad/Sunk], BatteryVoltage = <double>, Bilge=[on/off]
-    //so here we parse the bits we want from the string
-    std::string sStatus = "Unknown";
-
-    if (!MOOSValFromString(sStatus, Msg.GetString(), "Status"))
-        MOOSTrace(std::format("warning field \"Status\" not found in VehicleStatus string {}",
-            MOOSHERE));
-
-    double dfBatteryVoltage = -1;
-    if (!MOOSValFromString(dfBatteryVoltage, Msg.GetString(), "BatteryVoltage"))
-        MOOSTrace(std::format("warning field \"BatteryVoltage\" not found in VehicleStatus string {}",
-            MOOSHERE));
-
-    //simple print out of our findings..
-    MOOSTrace(std::format("Status is \"{}\" and battery voltage is {:.2f}V\n",
-        sStatus,
-        dfBatteryVoltage));
-
-    return true;
-}
-
-bool CSimulator::OnHeading(CMOOSMsg& Msg)
-{
-    MOOSTrace(std::format("I {} received a notification about \"{}\" the details are:\n",
-        GetAppName(),  //note the GetAppName() returns the name of this application as seen by the DB
-        Msg.GetKey()));  //note GetKey() returns the name of the variable
-
-    //if you want to see all the details you can print a message...
-    //Msg.Trace();
-
-    //you might want to be sure that the message is in the formate you were expecting
-    //in this case heading comes as a single double...
-
-    if (!Msg.IsDouble())
-        return MOOSFail("Ouch - I was promised \"Heading\" would be a double %s", MOOSHERE);
-
-    double dfHeading = Msg.GetDouble();
-    double dfTime = Msg.GetTime();
-
-    MOOSTrace(std::format("The heading (according to process {}), at time {} ({} since appstart) is {}\n",
-        Msg.GetSource(), //who wrote it
-        dfTime,  //when
-        dfTime-GetAppStartTime(),  //time since we started running (easier to read)
-        dfHeading));  //the actual heading
-
-    return true;
-}
-
-void CSimulator::DoRegistrations()
-{
-    std::cout << "DoRegistrations called" << std::endl;
-
-    //register to be told about every change (write) to "VehicleStatus"
-    m_Comms.Register("VehicleStatus", 0);
-
-    //register to be told about changes (writes) to "Heading" at most 4 times a second
-    m_Comms.Register("Heading", 0.25);
 }
 
 
