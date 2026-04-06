@@ -89,6 +89,8 @@ bool CSimulator::OnStartUp()
     std::string sComplex;
     if (m_MissionReader.GetConfigurationParam("InitialConditions", sComplex))
     {
+        MOOSTrace(std::format("InitialConditions string: {}\n", sComplex));
+
         //OK now we can suck out individual parameters from sComplex
 
         //what is the initial Bilge condition status?
@@ -111,8 +113,12 @@ bool CSimulator::OnStartUp()
 
     MOOSTrace("Verbose Summary:\n");
     MOOSTrace(std::format("\tVehicle is called : {}\n", m_sVehicleName));
-    MOOSTrace("\tInitial Location is  : {}\n", DoubleVector2String(vInitialLocation).c_str());
-    MOOSTrace(std::format("\tHeading is  : {}\n", m_sBilge));
+    MOOSTrace(std::format("\tInitial Location is  : {}\n", DoubleVector2String(vInitialLocation)));
+    MOOSTrace(std::format("\tHeading is: {}\n", m_dfHeading));
+    MOOSTrace(std::format("\tBatteryVoltage is: {}\n", m_dfBatteryVoltage));
+    MOOSTrace(std::format("\tBilge is: {}\n", m_sBilge));
+
+
 
     return true;
 }
