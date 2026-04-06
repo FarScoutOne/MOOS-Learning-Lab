@@ -5,7 +5,7 @@ project(ex2)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
 
 # Set MOOS root directory - change this single line to match your installation
-set(MOOS_ROOT "/home/ryne/moos-ivp")
+set(MOOS_ROOT "/home/ryne/Projects/shared/moos-ivp")
 
 # Where to find MOOS headers
 include_directories(

@@ -1,0 +1,15 @@
+# Build directories
+cmake-build-debug/
+cmake-build-release/
+build/
+
+# CLion IDE files
+.idea/
+
+# Compiled output
+*.o
+*.a
+*.so
+
+# Local machine configuration
+local.cmake
