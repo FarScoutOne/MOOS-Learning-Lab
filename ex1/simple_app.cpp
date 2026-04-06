@@ -146,8 +146,6 @@ bool CSimpleApp::OnHeading(CMOOSMsg& Msg)
 
 void CSimpleApp::DoRegistrations()
 {
-    std::cout << "DoRegistrations called" << std::endl;
-
     //register to be told about every change (write) to "VehicleStatus"
     m_Comms.Register("VehicleStatus", 0);
 

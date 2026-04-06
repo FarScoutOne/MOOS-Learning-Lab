@@ -89,8 +89,6 @@ bool CSimulator::OnStartUp()
     std::string sComplex;
     if (m_MissionReader.GetConfigurationParam("InitialConditions", sComplex))
     {
-        MOOSTrace(std::format("InitialConditions string: {}\n", sComplex));
-
         //OK now we can suck out individual parameters from sComplex
 
         //what is the initial Bilge condition status?
